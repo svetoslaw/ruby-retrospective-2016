@@ -1,10 +1,14 @@
 class Hash
   def fetch_deep(path)
-    split_path = path.split('.')
-    hash_dup = self.dup
-    fetch_deep_hash(hash_dup, split_path)
+    first_element_key, split_path = path.split('.', 2)
+    hash = self.keys_to_strings
+    if split_path && hash[first_element_key]
+      hash[first_element_key].fetch_deep(split_path) 
+    else
+      hash[first_element_key]
+    end
   end
-  
+
   def keys_to_strings
     result = {}
     self.each do |key, value|
@@ -22,36 +26,6 @@ class Hash
       end
     end.to_h
   end
-
-  private
-  
-  def fetch_deep_helper(input, path)
-    if input.is_a?(Hash)
-      fetch_deep_hash(input, path)
-    elsif input.is_a?(Array)
-      fetch_deep_arr(input, path)
-    end
-  end
-  
-  def fetch_deep_hash(hash, path)
-    hash = hash.keys_to_strings
-    if path.length == 1
-      hash[ path[0] ]
-    else
-      p = path.shift
-      fetch_deep_helper(hash[ p ], path)
-    end
-  end
-  
-  def fetch_deep_arr(arr, path)
-    if path.length == 1
-      arr[ path[0].to_i ]
-    else
-      p = path.shift
-      fetch_deep_helper(arr[ p.to_i ], path)
-    end
-  end
-  
 end
 
 class Array
@@ -62,5 +36,14 @@ class Array
       result << n
     end
     result
+  end
+
+  def fetch_deep(path)
+    first_element_key, split_path = path.split('.', 2)
+    if split_path && hash[first_element_key.to_i]
+      self[first_element_key.to_i].fetch_deep(split_path)
+    else
+      self[first_element_key.to_i]
+    end
   end
 end
