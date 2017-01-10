@@ -15,23 +15,19 @@ BOILING_POINTS = {
 }
 
 def convert_to_celsius(degrees, input_unit)
-  if input_unit == 'C'
-    degrees
-  elsif input_unit == 'K'
-    degrees - 273.15
-  elsif input_unit == 'F'
-    (degrees - 32) / 1.8
+  case input_unit
+  when 'C' then degrees
+  when 'K' then degrees - 273.15
+  when 'F' then (degrees - 32) / 1.8
   end
 end
 
 def convert_from_celsius(degrees, output_unit)
-  if output_unit == 'C'
-    degrees
-  elsif output_unit == 'K'
-    degrees + 273.15
-  elsif output_unit == 'F'
-    degrees * 1.8 + 32
-  end
+  case output_unit
+  when 'C' then degrees
+  when 'K' then degrees + 273.15
+  when 'F' then degrees * 1.8 + 32
+  end 
 end
 
 def convert_between_temperature_units(degrees, input_unit, output_unit)
