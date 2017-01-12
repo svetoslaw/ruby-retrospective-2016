@@ -11,29 +11,75 @@ RSpec.describe 'Version' do
       expect { Version.new('0..3') }.to raise_error(ArgumentError, message)
     end
   end
+
   describe 'Version comparison' do
-    it 'compares versions with same number of components' do
-      expect(Version.new('')).to eq Version.new
+    context 'versions with same number of components' do
+      it 'can compare two versions' do
+        expect(Version.new('1.3.3')).to eq Version.new('1.3.3')
+      end
 
-      expect(Version.new('1.3.3')).to eq Version.new('1.3.3')
+      it 'can compare equal versions' do
+        expect(Version.new('')).to eq Version.new
+        expect(Version.new('1.2.3')).to eq Version.new('1.2.3')
+        expect(Version.new('2.3')).to eq Version.new('2.3')
 
-      expect(Version.new('1.2.3')).to be < Version.new('1.3.3')
+        expect(Version.new('1.2.3')).to_not eq Version.new('1.2.0')
+      end
 
-      expect(Version.new('2.3.3')).to be > Version.new('1.4.3')
+      it 'can compare inequalities' do
+        expect(Version.new('1.2.3')).to be < Version.new('1.3.3')
+        expect(Version.new('1.2.3')).to be < Version.new('1.2.4')
+        expect(Version.new('1.2.5')).to_not be < Version.new('1.2.4')
+
+        expect(Version.new('2.3.3')).to be > Version.new('1.4.3')
+        expect(Version.new('2.3.3')).to be > Version.new('2.3.2')
+        expect(Version.new('2.3.3')).to_not be > Version.new('2.3.4')
+
+        expect(Version.new('1.2.3')).to be <= Version.new('1.2.3')
+        expect(Version.new('1.2.2')).to be <= Version.new('1.2.3')
+        expect(Version.new('1.2.4')).to_not be <= Version.new('1.2.3')
+
+        expect(Version.new('1.2.3')).to be >= Version.new('1.2.3')
+        expect(Version.new('1.3.3')).to be >= Version.new('1.2.3')
+        expect(Version.new('1.2.3')).to_not be >= Version.new('1.2.4')
+
+        expect(Version.new('1.2.3') <=> Version.new('1.2.4')).to eq -1
+        expect(Version.new('1.2.3') <=> Version.new('1.2.2')).to eq 1
+      end
     end
 
-    it 'compares versions with different number of components' do
-      expect(Version.new('1.3.3.0')).to eq Version.new('1.3.3')
+    context 'versions with different number of components' do
+      it 'can compare two versions' do
+        expect(Version.new('1.3.3.0')).to eq Version.new('1.3.3')
+      end
 
-      expect(Version.new('0.5')).to_not eq Version.new('5')
+      it 'can compare equal versions' do
+        expect(Version.new('1.2.3.0.0.0')).to eq Version.new('1.2.3')
 
-      expect(Version.new('1.3.3')).to be < Version.new('1.3.3.1')
+        expect(Version.new('0.5')).to_not eq Version.new('5')
+        expect(Version.new('1.0.1')).to_not eq Version.new('1.0.0.1')
+      end
 
-      expect(Version.new('1.3.3.0.1')).to be < Version.new('1.3.3.1')
+      it 'can compare inequalities' do
+        expect(Version.new('1.3.3')).to be < Version.new('1.3.3.1')
+        expect(Version.new('1.3.3.0.1')).to be < Version.new('1.3.3.1')
 
-      expect(Version.new('1.3')).to be > Version.new('1.2.3')
+        expect(Version.new('1.3')).to be > Version.new('1.2.3')
+        expect(Version.new('3')).to be > Version.new('0.3')
+        expect(Version.new('0.0.3')).to_not be > Version.new('0.3')
 
-      expect(Version.new('3')).to be > Version.new('0.3')
+        expect(Version.new('1.2.3')).to be <= Version.new('1.2.3.0')
+        expect(Version.new('1.2.2.9')).to be <= Version.new('1.2.3')
+        expect(Version.new('1.3.2.2')).to_not be <= Version.new('1.2.3')
+
+        expect(Version.new('1.2.3.0')).to be >= Version.new('1.2.3')
+        expect(Version.new('1.2.3.1')).to be >= Version.new('1.2.3')
+        expect(Version.new('1.2.3.1')).to_not be >= Version.new('1.2.4')
+
+        expect(Version.new('1.2.3.0.0') <=> Version.new('1.2.3')).to eq 0
+        expect(Version.new('1.2.3.0.1') <=> Version.new('1.2.4')).to eq -1
+        expect(Version.new('1.2.3.3') <=> Version.new('1.2.3')).to eq 1
+      end
     end
   end
 
