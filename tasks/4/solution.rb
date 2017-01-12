@@ -133,6 +133,13 @@ RSpec.describe 'Version' do
         expect(Version.new('3.5.8').components(2)).to eq([3, 5])
       end
     end
+
+    it 'cannot modify internal version data' do
+      version = Version.new('1.2.3')
+      version.components << 4
+
+      expect(version).to eq Version.new('1.2.3')
+    end
   end
 
   describe 'Version::Range' do
