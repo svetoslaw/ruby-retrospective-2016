@@ -1,13 +1,14 @@
 RSpec.describe 'Version' do
   describe 'Argument exception' do
     it 'throws ArgumentError on wrong input' do
-      expect { Version.new('.3') }.to raise_error(ArgumentError)
+      message = "Invalid version string '.3'"
+      expect { Version.new('.3') }.to raise_error(ArgumentError, message)
 
-      expect { Version.new('1.3.4..') }.to raise_error(ArgumentError)
+      message = "Invalid version string '1.3.4..'"
+      expect { Version.new('1.3.4..') }.to raise_error(ArgumentError, message)
 
-      expect { Version.new('0..3') }.to raise_error(ArgumentError)
-
-      expect { Version.new('throwexception') }.to raise_error(ArgumentError)
+      message = "Invalid version string '0..3'"
+      expect { Version.new('0..3') }.to raise_error(ArgumentError, message)
     end
   end
   describe 'Version comparison' do
