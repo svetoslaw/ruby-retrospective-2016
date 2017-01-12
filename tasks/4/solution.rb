@@ -144,6 +144,18 @@ RSpec.describe 'Version' do
 
   describe 'Version::Range' do
     describe 'Range#include?' do
+      it 'can construct ranges with strings' do
+        range = Version::Range.new('1.0.0', '3.0.0')
+        expect(range.include?('2.0.0')).to be true
+      end
+
+      it 'can construct ranges with version objects' do
+        v1 = Version.new('1.0.0')
+        v2 = Version.new('3.0.0')
+        range = Version::Range.new(v1, v2)
+        expect(range.include?('2.0.0')).to be true
+      end
+
       it 'returns true if version is within range' do
         range = Version::Range.new('1.0.0', '3.0.0')
         version = Version.new('2.0.0')
@@ -169,6 +181,10 @@ RSpec.describe 'Version' do
 
         range = Version::Range.new('1.3.5', '1.3.5')
         version = Version.new('1.3.5')
+        expect(range.include?(version)).to eq false
+
+        range = Version::Range.new('1.3.5', '1.3.5')
+        version = Version.new('1.3.4')
         expect(range.include?(version)).to eq false
 
         range = Version::Range.new('1.0.0', '2.0.0')
