@@ -11,7 +11,8 @@ module DataModelClassMethods
     if args.empty?
       @attributes
     else
-      @attributes = [] if @attributes == nil
+      @attributes = [:id] if @attributes == nil
+      generate_methods(:id)
       args.each do |attr_name|
         @attributes << attr_name
         generate_methods(attr_name)
@@ -25,7 +26,11 @@ module DataModelClassMethods
         raise DataModel::UnknownAttributeError, "Unknown attribute #{attr_name}"
       end
     end
-    where_helper(query)
+    result = []
+    @data_store.find(query).each do |record|
+      result << self.new(record)
+    end
+    result
   end
 
   private
@@ -37,19 +42,6 @@ module DataModelClassMethods
       where({attr_name => attr_value})
     end
   end
-
-  def where_helper(query)
-    result = []
-    @data_store.find(query).each do |record|
-      object = self.new
-      record.each do |attr_name, attr_value|
-        assign = attr_name.to_s.insert(0, '@').to_sym
-        object.instance_variable_set(assign, attr_value)
-      end
-      result << object
-    end
-    result
-  end
 end
 
 class DataModel
@@ -57,10 +49,7 @@ class DataModel
   class DeleteUnsavedRecordError < RuntimeError; end
   class UnknownAttributeError < RuntimeError; end
 
-  attr_reader :id
-
   def initialize(initial_values = {})
-    @id = nil
     initial_values.each do |attr_name, attr_value|
       assign = attr_name.to_s.insert(0, '@').to_sym
       if self.class.attributes.include? attr_name
@@ -72,35 +61,31 @@ class DataModel
   def save
     query = {}
     self.class.attributes.each { |attr_name| query[attr_name] = self.send(attr_name) }
-    if @id == nil
-      @id = self.class.data_store.current_id
-      query[:id] = @id
+    if self.id == nil
+      self.id = self.class.data_store.current_id
+      query[:id] = self.id
       self.class.data_store.create(query)
     else
-      self.class.data_store.update(@id, query)
+      self.class.data_store.update(self.id, query)
     end
     self
   end
 
   def delete
-    if @id == nil
+    if self.id == nil
       raise DataModel::DeleteUnsavedRecordError.new
     else
-      self.class.data_store.delete({id: @id})
-      @id = nil
+      self.class.data_store.delete({id: self.id})
+      self.id = nil
     end
     self
   end
 
   def ==(other)
     if self.class == other.class
-      if self.id != nil && self.id == other.id
-        return true
-      elsif self.object_id == other.object_id
-        return true
-      end
+      return self.id == other.id if self.id && other.id
     end
-    false
+    self.equal? other
   end
 end
 
@@ -134,9 +119,7 @@ class ArrayStore
   end
 
   def delete(query)
-    @storage.each do |record|
-      @storage.delete(record) if query.all? { |key, _| query[key] == record[key] }
-    end
+    @storage.reject! { |record| query.all? { |key, _| query[key] == record[key] } }
   end
 end
 
@@ -170,8 +153,8 @@ class HashStore
   end
 
   def delete(query)
-    @storage.each do |_, record|
-      @storage.delete(record) if query.all? { |key, _| query[key] == record[key] }
+    @storage.each do |id, record|
+      @storage.delete(id) if query.all? { |key, _| query[key] == record[key] }
     end
   end
 end
