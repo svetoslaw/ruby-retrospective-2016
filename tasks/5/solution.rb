@@ -153,8 +153,6 @@ class HashStore
   end
 
   def delete(query)
-    @storage.each do |id, record|
-      @storage.delete(id) if query.all? { |key, _| query[key] == record[key] }
-    end
+    @storage.reject! { |_, record| query.all? { |key, _| query[key] == record[key] } }
   end
 end
