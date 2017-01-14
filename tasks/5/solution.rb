@@ -114,6 +114,7 @@ class ArrayStore
     @storage.each do |record|
       if record[:id] == id
         new_attributes.each { |key, value| record[key] = value }
+        break
       end
     end
   end
@@ -148,6 +149,7 @@ class HashStore
     @storage.each do |_, record|
       if record[:id] == id
         new_attributes.each { |key, value| record[key] = value }
+        break
       end
     end
   end
