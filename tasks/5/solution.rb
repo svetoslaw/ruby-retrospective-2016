@@ -103,11 +103,7 @@ class ArrayStore
   end
 
   def find(query)
-    result = []
-    @storage.each do |record|
-      result << record if query.all? { |key, _| query[key] == record[key] }
-    end
-    result
+    @storage.select { |record| query.all? { |key, _| query[key] == record[key] } }
   end
 
   def update(id, new_attributes)
@@ -138,11 +134,9 @@ class HashStore
   end
 
   def find(query)
-    result = []
-    @storage.each do |_, record|
-      result << record if query.all? { |key, _| query[key] == record[key] }
-    end
-    result
+    @storage.select do |_, record|
+      query.all? { |key, _| query[key] == record[key] }
+    end.values.to_a
   end
 
   def update(id, new_attributes)
